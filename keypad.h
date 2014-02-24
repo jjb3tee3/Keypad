@@ -8,6 +8,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/* KEY DEFINITIONS */
+#define KP_KEYPRESS_EVENT 0x00
+#define KP_KEY_DOWN_EVENT 0x01
+#define KP_KEY_UP_EVENT 0x02
 
-/* FUNCTION DECLARATIONS */
+typedef void (*kp_key_handler_t)(int)
+
+struct kp_handler {
+	kp_key_handler_t key_pressed,
+	kp_key_handler_t key_down,
+	kp_key_handler_t key_up
+};
+
+void kp_init();
+void kp_loop();
+void kp_register_handler(int, kp_key_handler_t);
