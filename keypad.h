@@ -27,6 +27,6 @@ typedef struct kp_handler {
 	kp_key_handler_t key_up;
 };
 
-int kp_init(volatile unsigned int *);
-void kp_loop();
+int kp_init();
+void kp_loop(volatile unsigned int *);
 void kp_register_handler(unsigned int, kp_key_handler_t);
