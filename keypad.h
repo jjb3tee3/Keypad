@@ -21,11 +21,11 @@
 #define KP_INFO 0x01
 #define KP_ERROR 0x02
 
-#define KP_KEY_PRESS_EVENT 0x00
-#define KP_KEY_DOWN_EVENT 0x01
-#define KP_KEY_UP_EVENT 0x02
+#define KP_KEY_PRESS_EVENT 0x01
+#define KP_KEY_DOWN_EVENT 0x02
+#define KP_KEY_UP_EVENT 0x04
 
-#define KP_BIT_SET(val, bit) ((val) & (1<<(bit)))
+#define KP_BIT_SET(val, bit) ((val & bit))
 
 typedef void (*kp_key_handler_t)(int);
 

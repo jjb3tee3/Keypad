@@ -84,14 +84,21 @@ void kp_register_handler(unsigned int event, void(*handler)(int)) {
 	if(handlers == NULL)
 		handlers = (kp_handler *)malloc(sizeof(kp_handler));
 	
-	if(KP_BIT_SET(event, KP_KEY_PRESS_EVENT))
+	if((event & KP_KEY_PRESS_EVENT) == KP_KEY_PRESS_EVENT) {
+		printd(KP_DEBUG, "Registering key press event: %x", 
+			handler);
 		handlers->key_pressed = handler;
+	}
 
-	if(KP_BIT_SET(event, KP_KEY_DOWN_EVENT))
+	if(KP_BIT_SET(event, KP_KEY_DOWN_EVENT)) {
+		printd(KP_DEBUG, "Registering key down event: %x", handler);
 		handlers->key_down = handler;
+	}
 
-	if(KP_BIT_SET(event, KP_KEY_UP_EVENT))
+	if(KP_BIT_SET(event, KP_KEY_UP_EVENT)) {
+		printd(KP_DEBUG, "Registering key up event: %x", handler);
 		handlers->key_up = handler;
+	}
 	
 	handlers->key_pressed(5);
 
@@ -123,9 +130,8 @@ int main(int argc, char **argv) {
 		return -1;
 	}
 	*/
-	kp_register_handler(KP_KEY_PRESS_EVENT, test_handler);
-	if(handlers != NULL)
-		printd(KP_DEBUG, "%x", handlers->key_pressed);
-	handlers->key_pressed = test_handler;
+	kp_register_handler(KP_KEY_PRESS_EVENT | KP_KEY_DOWN_EVENT, 
+				test_handler);
+	
 	return 0;
 }
