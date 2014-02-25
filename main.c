@@ -1,6 +1,8 @@
 #include "keypad.h"
 
 int KP_DEBUG_MODE = 0;
+kp_handler *handlers = NULL;
+pthread_mutex_t kp_handlers_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 /* Helper function to print debug messages */
 void printd(unsigned int level, const char* format, ...) {
@@ -31,12 +33,12 @@ void printd(unsigned int level, const char* format, ...) {
 
 int kp_init() {
 	int fd;	
-	//int page_size = getpagesize();
+	int page_size = getpagesize();
 	unsigned int *mem_addr = NULL;
 	unsigned int mem_phys = 0x72A00000;
 	volatile unsigned int *enable_vga;
 	volatile unsigned int *vga_reg;
-
+	
 	fd = open("/dev/mem", O_RDWR | O_SYNC);
 
 	if(fd < 0) {
@@ -67,14 +69,37 @@ int kp_init() {
 	*enable_vga = 0x000001E0;
 
 	kp_loop(vga_reg);
+
+	return 0;
 }
 
-void kp_loop(volatile unsigned int port) {
+void kp_loop(volatile unsigned int *port) {
 // check keypad for input
 }
 
-void kp_register_handler(unsigned int event, kp_key_handler_t handler) {
+void kp_register_handler(unsigned int event, void(*handler)(int)) {
 // set handler functions in struct
+	pthread_mutex_lock(&kp_handlers_mutex);
+	
+	if(handlers == NULL)
+		handlers = (kp_handler *)malloc(sizeof(kp_handler));
+	
+	if(KP_BIT_SET(event, KP_KEY_PRESS_EVENT))
+		handlers->key_pressed = handler;
+
+	if(KP_BIT_SET(event, KP_KEY_DOWN_EVENT))
+		handlers->key_down = handler;
+
+	if(KP_BIT_SET(event, KP_KEY_UP_EVENT))
+		handlers->key_up = handler;
+	
+	handlers->key_pressed(5);
+
+	pthread_mutex_unlock(&kp_handlers_mutex);
+}
+
+void test_handler(int key) {
+	printd(KP_INFO, "key pressed: %d", key);
 }
 
 int main(int argc, char **argv) {
@@ -98,5 +123,9 @@ int main(int argc, char **argv) {
 		return -1;
 	}
 	*/
+	kp_register_handler(KP_KEY_PRESS_EVENT, test_handler);
+	if(handlers != NULL)
+		printd(KP_DEBUG, "%x", handlers->key_pressed);
+	handlers->key_pressed = test_handler;
 	return 0;
 }
