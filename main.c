@@ -77,14 +77,15 @@ void kp_loop(volatile unsigned int *port) {
 // check keypad for input
 }
 
+/* 	This function uses ifs instead of switch case so the same
+	handler can be registered for multiple events. */
 void kp_register_handler(unsigned int event, void(*handler)(int)) {
-// set handler functions in struct
 	pthread_mutex_lock(&kp_handlers_mutex);
 	
 	if(handlers == NULL)
 		handlers = (kp_handler *)malloc(sizeof(kp_handler));
 	
-	if((event & KP_KEY_PRESS_EVENT) == KP_KEY_PRESS_EVENT) {
+	if(KP_BIT_SET(event, KP_KEY_PRESS_EVENT)) {
 		printd(KP_DEBUG, "Registering key press event: %x", 
 			handler);
 		handlers->key_pressed = handler;
@@ -100,8 +101,6 @@ void kp_register_handler(unsigned int event, void(*handler)(int)) {
 		handlers->key_up = handler;
 	}
 	
-	handlers->key_pressed(5);
-
 	pthread_mutex_unlock(&kp_handlers_mutex);
 }
 
@@ -132,6 +131,8 @@ int main(int argc, char **argv) {
 	*/
 	kp_register_handler(KP_KEY_PRESS_EVENT | KP_KEY_DOWN_EVENT, 
 				test_handler);
+	
+	handlers->key_pressed(5);	
 	
 	return 0;
 }
